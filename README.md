@@ -26,6 +26,7 @@ Here are some of the documents from Apple that informed the style guide. If some
 * [Blocks](#blocks)
 * [CGRect Functions](#cgrect-functions)
 * [Constants](#constants)
+  * [UI Magic Numbers](#ui-magic-numbers)
 * [Enumerated Types](#enumerated-types)
 * [Bitmasks](#bitmasks)
 * [Private Properties](#private-properties)
@@ -336,6 +337,61 @@ static const CGFloat ADYImageThumbnailHeight = 50.0;
 
 #define thumbnailHeight 2
 ```
+
+### UI Magic Numbers
+
+Ideally all layout measurements are done in a Storyboard or XIB. For cases of UI layout in code some use of magic numbers can be made on a case-by-base basis for UI measurements that aren't reused. Still, the amount of magic should be kept to a minimum. Local, well-named variables as needed, promoted to a `const` when used in more than one method, extracted to `ABAppearance` when used across multiple classes.
+
+**For Example:**
+
+```objc
+static const CGFloat ADYVerticalRhythmSpacing = 12.;
+
+- (void)setupLayout
+{
+    UIView *parentView = self.someView.superview;
+    [self.someView mas_makeConstraints:^(MASConstraintMaker *make) {
+        CGFloat horizontalPadding = 20.f;
+        make.left.equalTo(parentView.mas_left).offset(horizontalPadding);
+        make.right.equalTo(parentView.mas_right).offset(-horizontalPadding);
+        make.top.mas_equalTo(ADYVerticalRhythmSpacing);
+    }];
+}
+
+- (void)addItem
+{
+    id newItem = generateNewItem();
+    [newItem mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(ADYVerticalRhythmSpacing);
+        …
+    }];
+}
+```
+
+**Not:**
+
+```objc
+
+- (void)setupLayout
+{
+    UIView *parentView = self.someView.superview;
+    [self.someView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(parentView.mas_left).offset(20);
+        make.right.equalTo(parentView.mas_right).offset(-20);
+        make.top.mas_equalTo(12);
+    }];
+}
+
+- (void)addItem
+{
+    id newItem = generateNewItem();
+    [newItem mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.mas_equalTo(12);
+        …
+    }];
+}
+```
+
 
 ## Enumerated Types
 
